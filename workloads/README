@@ -1,0 +1,2 @@
+We created four example workloads that have differently sized values, ranging from 128B to 1KB. The mix of reads and writes is 99% vs. 1%.
+In the experiments you will have to adjust the amount of writes in order to show how replication affects for instance performance in the presence of more writes. To do so edit the workload files and change the fractions at the end (cmd type 0 is set, type 1 is get).
