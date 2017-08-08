@@ -86,7 +86,8 @@ repetitionNo = 3
 repetitionSec = 30
 setupTime = 40
 threads = range(8, 33, 8)
-percentiles = [50, 90, 99]
+#percentiles = [50, 90, 99]
+percentiles = [50, 90]
 # clients
 start = 20
 stop = 400
@@ -148,16 +149,24 @@ print "TSERVERPCT:", TSERVERPCT
 
 
 # Plotting
+def modifyColor(color, p):
+    l = []
+    for c in range(3):
+        l.append(color[c]*p)
+    return (l[0], l[1], l[2])
+
 clients = range(start, stop + 1, step)
 ticks = range(0, stop + 1, step*2)
 
 colors = [(27,158,119), (217,95,2), (117,112,179), (231,41,138), (102,166,30), (230,171,2)]
 colors = [(r/255.0, g/255.0, b/255.0) for r, g, b in colors]
+formats = ["-o", "-D", "-s", "-v"]
+maxColorP = -0.35
 
 # throughput
 plt.figure()
 for tIndex in range(len(threads)):
-    plt.errorbar(clients, TPS[tIndex], yerr=TPSSTD[tIndex], color=colors[tIndex], fmt="-o", label="{} Threads".format(threads[tIndex]))
+    plt.errorbar(clients, TPS[tIndex], yerr=TPSSTD[tIndex], color=colors[tIndex], fmt=formats[tIndex], label="{} Threads".format(threads[tIndex]))
 plt.legend(loc="best")
 plt.xticks(ticks)
 plt.xlim(xmax=(stop + step))
@@ -170,7 +179,7 @@ plt.savefig("maxthroughput_throughput.png")
 # response time
 plt.figure()
 for tIndex in range(len(threads)):
-    plt.errorbar(clients, RAVG[tIndex], yerr=RSTD[tIndex], color=colors[tIndex], fmt="-o", label="{} Threads".format(threads[tIndex]))
+    plt.errorbar(clients, RAVG[tIndex], yerr=RSTD[tIndex], color=colors[tIndex], fmt=formats[tIndex], label="{} Threads".format(threads[tIndex]))
 plt.legend(loc="best")
 plt.xticks(ticks)
 plt.xlim(xmax=(stop + step))
@@ -180,12 +189,28 @@ plt.xlabel("Clients")
 plt.ylabel("Response time (msec)")
 plt.savefig("maxthroughput_response_time.png")
 
+# middleware response time percentiles for 24, 32 threads
+plt.figure()
+#for tIndex in [2, 3]:
+for tIndex in range(len(threads)):
+    for pIndex in range(len(percentiles)):
+        color = modifyColor(colors[tIndex], 1 + pIndex*maxColorP/(len(percentiles) - 1))
+        plt.plot(clients, TMWPCT[pIndex][tIndex], formats[tIndex], color=color, label="{} Threads ({}th percentile)".format(threads[tIndex], percentiles[pIndex]))
+plt.legend(loc="best")
+plt.xticks(ticks)
+plt.xlim(xmax=(stop + step))
+plt.ylim(ymin=0)
+plt.grid()
+plt.xlabel("Clients")
+plt.ylabel("Response time (msec)")
+plt.savefig("maxthroughput_mw_response_time_all.png")
+
 for tIndex in range(len(threads)):
     # middleware response time percentiles
     plt.figure()
-    plt.title("{} Threads".format(threads[tIndex]))
+    #plt.title("{} Threads".format(threads[tIndex]))
     for pIndex in range(len(percentiles)):
-        plt.plot(clients, TMWPCT[pIndex][tIndex], "-o", color=colors[pIndex], label="{}th percentile".format(percentiles[pIndex]))
+        plt.plot(clients, TMWPCT[pIndex][tIndex], formats[pIndex], color=colors[pIndex], label="{}th percentile".format(percentiles[pIndex]))
     plt.legend(loc="best")
     plt.xticks(ticks)
     plt.xlim(xmax=(stop + step))
@@ -197,9 +222,9 @@ for tIndex in range(len(threads)):
 
     # middleware queue time percentiles
     plt.figure()
-    plt.title("{} Threads".format(threads[tIndex]))
+    #plt.title("{} Threads".format(threads[tIndex]))
     for pIndex in range(len(percentiles)):
-        plt.plot(clients, TQUEUEPCT[pIndex][tIndex], "-o", color=colors[pIndex], label="{}th percentile".format(percentiles[pIndex]))
+        plt.plot(clients, TQUEUEPCT[pIndex][tIndex], formats[pIndex], color=colors[pIndex], label="{}th percentile".format(percentiles[pIndex]))
     plt.legend(loc="best")
     plt.xticks(ticks)
     plt.xlim(xmax=(stop + step))
@@ -211,9 +236,9 @@ for tIndex in range(len(threads)):
 
     # middleware server time percentiles
     plt.figure()
-    plt.title("{} Threads".format(threads[tIndex]))
+    #plt.title("{} Threads".format(threads[tIndex]))
     for pIndex in range(len(percentiles)):
-        plt.plot(clients, TSERVERPCT[pIndex][tIndex], "-o", color=colors[pIndex], label="{}th percentile".format(percentiles[pIndex]))
+        plt.plot(clients, TSERVERPCT[pIndex][tIndex], formats[pIndex], color=colors[pIndex], label="{}th percentile".format(percentiles[pIndex]))
     plt.legend(loc="best")
     plt.xticks(ticks)
     plt.xlim(xmax=(stop + step))

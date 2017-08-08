@@ -106,18 +106,22 @@ for totalClients in range(start, stop + 1, step):
         responseTimeAll += extractMemaslapValues(benchmark)
     RTMEM.append(responseTimeAll)
 
-#RTMWPCT50 = [percentile(MWList, 50)/1000 for MWList in RTMW]
-#RTMEMPCT50 = [percentile(MEMList, 50)/1000 for MEMList in RTMEM]
-RTMWPCT50 = [mean(MWList)/1000 for MWList in RTMW]
-RTMEMPCT50 = [mean(MEMList)/1000 for MEMList in RTMEM]
+RTMWPCT50 = [percentile(MWList, 50)/1000 for MWList in RTMW]
+RTMEMPCT50 = [percentile(MEMList, 50)/1000 for MEMList in RTMEM]
+#RTMWPCT50 = [mean(MWList)/1000 for MWList in RTMW]
+#RTMEMPCT50 = [mean(MEMList)/1000 for MEMList in RTMEM]
+DIFF = [RTMEMPCT50[i] - RTMWPCT50[i] for i in range(len(RTMEMPCT50))]
 
+print "----------------------"
 print "RTMWPCT50:", RTMWPCT50
 print "RTMEMPCT50:", RTMEMPCT50
+print "DIFF:", DIFF
 
-responseTimeAll = RTMEM[13]
-tMWAll = RTMW[13]
+clientsIndex = 12 #260 clients index
+responseTimeAll = RTMEM[clientsIndex]
+tMWAll = RTMW[clientsIndex]
 
-maxValue = percentile(responseTimeAll, 99.9)
+maxValue = percentile(responseTimeAll, 99)
 responseTimeAll = [v/1000.0 for v in responseTimeAll if v <= maxValue]
 print min(responseTimeAll), max(responseTimeAll), mean(responseTimeAll), stdev(responseTimeAll)
 tMWAll = [v/1000.0 for v in tMWAll if v <= maxValue]
@@ -125,10 +129,10 @@ print min(tMWAll), max(tMWAll), mean(tMWAll), stdev(tMWAll)
 
 
 # Plotting
-def darken(color):
+def modifyColor(color, p):
     l = []
     for c in range(3):
-        l.append(color[c]*0.50)
+        l.append(color[c]*p)
     return (l[0], l[1], l[2])
 
 clients = range(start, stop + 1, step)
@@ -148,21 +152,22 @@ param = gamma.fit(tMWAll, floc=0)
 tMWFit = gamma.pdf(x, *param)
 
 plt.figure()
-plt.plot(x, responseTimeFit, color=darken(colors[0]))
-plt.plot(x, tMWFit, color=darken(colors[1]))
+plt.plot(x, responseTimeFit, color=modifyColor(colors[0], 0.5))
+plt.plot(x, tMWFit, color=modifyColor(colors[1], 0.5))
 plt.hist(responseTimeAll, bins=20, normed=True, color=colors[0], label="Memaslap")
 plt.hist(tMWAll, bins=20, normed=True, color=colors[1], alpha=0.60, label="Middleware")
+plt.legend(loc="best")
 plt.ylim(ymin=0)
 plt.grid()
-plt.xlabel("Response time in msecs")
+plt.xlabel("Response time (msec)")
 plt.ylabel("Probability")
-plt.legend()
 plt.savefig("distribution_response_time.png")
 
 # memaslap vs middleware response time
 plt.figure()
-plt.plot(clients, RTMEMPCT50, "-o", color=colors[0], label="Memaslap")
-plt.plot(clients, RTMWPCT50, "-o", color=colors[1], label="Middleware")
+plt.plot(clients, RTMEMPCT50, "-o", color=colors[0], label="Memaslap (50th percentile)")
+plt.plot(clients, RTMWPCT50, "-D", color=colors[1], label="Middleware (50th percentile)")
+#plt.plot(clients, DIFF, "-s", color=colors[3], label="Difference")
 plt.legend(loc="best")
 plt.xticks(ticks)
 plt.xlim(xmax=(stop + step))
@@ -171,3 +176,4 @@ plt.grid()
 plt.xlabel("Clients")
 plt.ylabel("Response time (msec)")
 plt.savefig("response_time_difference.png")
+

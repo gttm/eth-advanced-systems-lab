@@ -175,7 +175,9 @@ def modifyColor(color, p):
 
 colors = [(27,158,119), (217,95,2), (117,112,179), (231,41,138), (102,166,30), (230,171,2)]
 colors = [(r/255.0, g/255.0, b/255.0) for r, g, b in colors]
+hatches = ['/', '.', 'x']
 labelsR = ["No replication", "Half replication", "Full replication"]
+maxColorP = -0.35
 
 # throughput
 width = 0.35 
@@ -185,7 +187,7 @@ for op in range(len(OP)):
         offset = [mc + (rIndex - len(R[0])/2.0)*width for mc in S]
         values = [TPS[op][mcIndex][rIndex] for mcIndex in range(len(S))]
         valuesStd = [TPSSTD[op][mcIndex][rIndex] for mcIndex in range(len(S))]
-        plt.bar(offset, values, width, color=colors[rIndex], yerr=valuesStd, label=labelsR[rIndex])
+        plt.bar(offset, values, width, color=colors[rIndex], hatch=hatches[rIndex], yerr=valuesStd, label=labelsR[rIndex])
     plt.legend(loc="best")
     plt.xticks(S)
     plt.ylim(ymin=0)
@@ -202,9 +204,9 @@ for op in range(len(OP)):
         for pIndex in range(len(percentiles)):
             offset = [mc + (len(percentiles)*rIndex + pIndex - len(percentiles)*len(R[0])/2.0)*width for mc in S]
             values = [TMWPCT[op][pIndex][mcIndex][rIndex] for mcIndex in range(len(S))]
-            color = modifyColor(colors[rIndex], 1 - pIndex*0.5/(len(percentiles) - 1))
-            plt.bar(offset, values, width, color=color, label="{} ({}th percentile)".format(labelsR[rIndex], percentiles[pIndex]))
-    lgd = plt.legend(loc="upper left", bbox_to_anchor=(1, 0.75))
+            color = modifyColor(colors[rIndex], 1 + pIndex*maxColorP/(len(percentiles) - 1))
+            plt.bar(offset, values, width, color=color, hatch=hatches[rIndex], label="{} ({}th percentile)".format(labelsR[rIndex], percentiles[pIndex]))
+    lgd = plt.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1))
     plt.xticks(S)
     plt.ylim(ymin=0)
     plt.grid(axis='y')
@@ -220,9 +222,9 @@ for op in range(len(OP)):
         for pIndex in range(len(percentiles)):
             offset = [mc + (len(percentiles)*rIndex + pIndex - len(percentiles)*len(R[0])/2.0)*width for mc in S]
             values = [TQUEUEPCT[op][pIndex][mcIndex][rIndex] for mcIndex in range(len(S))]
-            color = modifyColor(colors[rIndex], 1 - pIndex*0.5/(len(percentiles) - 1))
-            plt.bar(offset, values, width, color=color, label="{} ({}th percentile)".format(labelsR[rIndex], percentiles[pIndex]))
-    lgd = plt.legend(loc="upper left", bbox_to_anchor=(1, 0.75))
+            color = modifyColor(colors[rIndex], 1 + pIndex*maxColorP/(len(percentiles) - 1))
+            plt.bar(offset, values, width, color=color, hatch=hatches[rIndex], label="{} ({}th percentile)".format(labelsR[rIndex], percentiles[pIndex]))
+    lgd = plt.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1))
     plt.xticks(S)
     plt.ylim(ymin=0)
     plt.grid(axis='y')
@@ -238,9 +240,9 @@ for op in range(len(OP)):
         for pIndex in range(len(percentiles)):
             offset = [mc + (len(percentiles)*rIndex + pIndex - len(percentiles)*len(R[0])/2.0)*width for mc in S]
             values = [TSERVERPCT[op][pIndex][mcIndex][rIndex] for mcIndex in range(len(S))]
-            color = modifyColor(colors[rIndex], 1 - pIndex*0.5/(len(percentiles) - 1))
-            plt.bar(offset, values, width, color=color, label="{} ({}th percentile)".format(labelsR[rIndex], percentiles[pIndex]))
-    lgd = plt.legend(loc="upper left", bbox_to_anchor=(1, 0.75))
+            color = modifyColor(colors[rIndex], 1 + pIndex*maxColorP/(len(percentiles) - 1))
+            plt.bar(offset, values, width, color=color, hatch=hatches[rIndex], label="{} ({}th percentile)".format(labelsR[rIndex], percentiles[pIndex]))
+    lgd = plt.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1))
     plt.xticks(S)
     plt.ylim(ymin=0)
     plt.grid(axis='y')
